@@ -139,47 +139,7 @@ async def get_role_deleter(guild, deleted_role):
         if entry.target.id == deleted_role.id:
             return entry.user
     return None
-
-class SelectAutoModeration(disnake.ui.StringSelect):
-    def __init__(self, author):
-        self.author = author
-        options=[
-            disnake.SelectOption(
-                label="Ban-Words",
-                value="banword",
-                description="."
-            ),
-            disnake.SelectOption(
-                label="Url",
-                value="url",
-                description="."
-            )
-        ]
-        super().__init__(min_values=1, max_values=1, placeholder="Выберите тип настройки", options=options)
-
-    async def select_callback(self, select, interaction):
-        if interaction.author == self.author:
-            embed = disnake.Embed(title="Авто-Модерация")
-            async with aiosqlite.connect("anticrash.db") as db:
-                cursor = await db.cursor()
-                if select.values[0] == 'banword':
-                    await cursor.execute("SELECT banwordstatus FROM automoderation")
-                    result = await cursor.fetchone()
-                    current_status = result[0] if result else 0
-                    new_status = 1 if current_status == 0 else 0
-                    await cursor.execute("UPDATE automoderation SET banwordstatus = ?", (new_status,))
-                    embed.add_field(name="Ban-Words", value=f"Статус успешно изменен на {new_status}")
-                elif select.values[0] == 'url':
-                    await cursor.execute("SELECT urlstatus FROM automoderation")
-                    result = await cursor.fetchone()
-                    current_status = result[0] if result else 0
-                    new_status = 1 if current_status == 0 else 0
-                    await cursor.execute("UPDATE automoderation SET urlstatus = ?", (new_status,))
-                    embed.add_field(name="URL", value=f"Статус успешно изменен на {new_status}")
-            await db.commit()
-            await interaction.send(embed=embed, ephemeral=True)
-        else:
-            await interaction.send("Вы не имеете доступ к данной интеракции", ephemeral=True)
+    
 class BackButton(disnake.ui.Button):
     def __init__(self, author):
         self.author = author
